@@ -10,8 +10,8 @@
 #include "CommandQueue.h"
 
 #define BAUD_RATE 9600
-#define TX_BUF 516
-#define RX_BUF 516
+#define TX_BUF 1024
+#define RX_BUF 1024
 
 // typedef enum
 // {
@@ -36,7 +36,8 @@ void send_command();
 uint8_t *get_uart_rx_byte_array(CommandQueue *cq, int command);
 int uart_send(void *data);
 void open_abnt_session(void *data);
-
+uint16_t crc16arc_bit(uint16_t crc, void const *mem, size_t len);
+uint16_t replaceByte(uint16_t value, uint8_t b, uint16_t pos);
 UARTData *uart_data_as_abnt();
 void uart_data_as_dlms(UARTData *data);
 

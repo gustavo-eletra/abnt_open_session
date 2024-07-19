@@ -1,4 +1,5 @@
 #include "CommandQueue.h"
+#include "ABNTSession.h"
 
 CommandQueue *create_command_queue(size_t size)
 {
