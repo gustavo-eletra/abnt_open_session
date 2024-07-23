@@ -1,5 +1,6 @@
 #include <string.h>
 #include <mbedtls/sha256.h>
+#include <freertos/FreeRTOS.h>
 #include "hmac.h"
 
 // void *fmemcpy(void *dst, const void *src, size_t num_bytes_to_copy)
@@ -34,10 +35,9 @@
 //     (uint64_t   )
 // }
 
-uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
+void hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len, uint8_t *hmac_buffer)
 {
-    uint8_t *hmac = (uint8_t *)malloc(32);
-    uint8_t *aux  = (uint8_t *)malloc(msg_len + 64);
+    uint8_t *aux  = (uint8_t *)malloc((msg_len + 64) * sizeof(uint8_t));
 
     uint8_t t_ipad[64];
     uint8_t t_opad[64];
@@ -58,24 +58,22 @@ uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
 
     for(int i = 0; i < msg_len; i++)
     {
-        aux[63 + i] = msg[i];
+        aux[64 + i] = msg[i];
     }
 
-    mbedtls_sha256(aux, msg_len + 64, hmac, 0);
+    mbedtls_sha256(aux, msg_len + 64, hmac_buffer, 0);
 
     free(aux);
-    aux = malloc(msg_len + 32);
+    aux = (uint8_t *)malloc((msg_len + 64) * sizeof(uint8_t));
 
     memcpy(aux, t_opad, 64);
     
     for(int i = 0; i < 32; i++)
     {
-        aux[63 + i] = hmac[i];
+        aux[64 + i] = hmac_buffer[i];
     }
 
-    mbedtls_sha256(aux, msg_len + 64, hmac, 0);
+    mbedtls_sha256(aux, msg_len + 64, hmac_buffer, 0);
 
     free(aux);
-
-    return hmac;
 }
