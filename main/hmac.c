@@ -35,9 +35,10 @@
 //     (uint64_t   )
 // }
 
-void hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len, uint8_t *hmac_buffer)
+uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
 {
     uint8_t *aux  = (uint8_t *)malloc((msg_len + 64) * sizeof(uint8_t));
+    uint8_t *hash = (uint8_t *)malloc(sizeof(uint8_t) * 32);
 
     uint8_t t_ipad[64];
     uint8_t t_opad[64];
@@ -61,7 +62,7 @@ void hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len, uint8_t
         aux[64 + i] = msg[i];
     }
 
-    mbedtls_sha256(aux, msg_len + 64, hmac_buffer, 0);
+    mbedtls_sha256(aux, msg_len + 64, hash, 0);
 
     free(aux);
     aux = (uint8_t *)malloc((msg_len + 64) * sizeof(uint8_t));
@@ -70,10 +71,11 @@ void hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len, uint8_t
     
     for(int i = 0; i < 32; i++)
     {
-        aux[64 + i] = hmac_buffer[i];
+        aux[64 + i] = hash[i];
     }
 
-    mbedtls_sha256(aux, msg_len + 64, hmac_buffer, 0);
+    mbedtls_sha256(aux, msg_len + 64, hash, 0);
 
     free(aux);
+    return hash;
 }

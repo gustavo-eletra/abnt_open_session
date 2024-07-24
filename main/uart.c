@@ -177,7 +177,7 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
     uint16_t crc_dr = 0;
     uint16_t crc_checker = 0;
 
-     uart_write_bytes(UART_NUM_2, s, size_of_s);
+    uart_write_bytes(UART_NUM_2, s, size_of_s);
     ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM_2, 100));   
     while(uart_retries <= retries)
     {
@@ -185,17 +185,17 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
 
         if(code > -1)
         {
-            for(int i = 0; i < 258; i++)
-            {
-                if(i < 257)
-                {
-                    printf("%x | ", r[i]);
-                }
-                else
-                {
-                    printf("%x\n", r[i]);
-                }
-            }
+            // for(int i = 0; i < 258; i++)
+            // {
+            //     if(i < 257)
+            //     {
+            //         printf("%x | ", r[i]);
+            //     }
+            //     else
+            //     {
+            //         printf("%x\n", r[i]);
+            //     }
+            // }
 
             crc_dr = replaceByte(crc_dr, r[size_of_r - 2], 1);
             crc_dr = replaceByte(crc_dr, r[size_of_r - 1], 0);
@@ -211,11 +211,16 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
                 ESP_LOGI("UART", "Message validated!");
                 break;
             }
-            else
+            
+            if(crc_dr == crc_checker && r[0] == 0x40)
             {
-                uart_retries++;
-                ESP_LOGE("UART", "Message invalid");
+                ESP_LOGE(UART_TAG, "Session Locked");
+                return 1;
             }
+
+            uart_retries++;
+            ESP_LOGE(UART_TAG, "Inavlid message");
+            
         }
         else
         {
