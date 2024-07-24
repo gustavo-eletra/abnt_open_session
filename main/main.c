@@ -29,7 +29,7 @@ void app_main(void)
     set(ds, 0x13, NULL, 0);
     send(ds, dr, 66, 258, 10);
 
-    printf("string to solve:\n");
+    printf("string to solve(formated):\n");
     for(int i = 0; i < 32; i++)
     {
         msg_to_solve[i] = dr[5 + i];
@@ -47,6 +47,19 @@ void app_main(void)
         }
     }
 
+
+    printf("string to solve:\n");
+    for(int i = 0; i < 32; i++)
+    {
+        if(i < 31)
+        {
+            printf("%x", msg_to_solve[i]);
+        }
+        else
+        {
+            printf("%x\n", msg_to_solve[i]);
+        }
+    }
 
     uint8_t key[1] = {0x00};
     uint8_t *hmac_str = hmac(key, 1, msg_to_solve, 32);
