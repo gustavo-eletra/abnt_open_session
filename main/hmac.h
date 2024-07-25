@@ -10,3 +10,4 @@
 // void *fmemcpy(void *dst, const void *src, size_t n);
 
 uint8_t *hmac(uint8_t *key, size_t key_length,uint8_t *msg, size_t msg_len);
+void update_pads(uint8_t *ipad, uint8_t *opad, uint8_t *key, int key_len);

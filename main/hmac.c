@@ -3,37 +3,47 @@
 #include <freertos/FreeRTOS.h>
 #include "hmac.h"
 
-// void *fmemcpy(void *dst, const void *src, size_t num_bytes_to_copy)
-// {
-//     uint8_t *d = (uint8_t *)dst;
-//     uint8_t *s = (uint8_t *) s;
+void update_pads(uint8_t *ipad, uint8_t *opad, uint8_t *key, int key_len)
+{
+    for(int i = 0; i < 64; i++)
+    {
+        ipad[i] = IPAD_VALUE;
+        opad[i] = OPAD_VALUE;
+    }
 
-//     while (num_bytes_to_copy--)
-//     {
-//         *d++ = *s++;
-//     }
-    
-// }
+    for(int i = 0; i < key_len; ++i)
+    {
+        ipad[i] ^= key[i];
+        opad[i] ^= key[i];
+    }
 
-// uint8_t *build_msg(const uint8_t *msg, size_t msg_len, size_t formmated_msg_len, bool is_litte_endian)
-// {
-//     uint8_t *fmt_msg;
-//     size_t cursor;
-//     if(!(fmt_msg = malloc(formmated_msg_len)))
-//     {
-//         return NULL;
-//     }
-//     memcpy(fmt_msg, msg, msg_len);
-//     fmt_msg[formmated_msg_len] = 0b10000000;
-//     cursor = msg_len + 1;
 
-//     while (cursor < formmated_msg_len)
-//     {
-//         fmt_msg[cursor++] = 0;
-//     }
-    
-//     (uint64_t   )
-// }
+    printf("IPAD:\n");
+    for (size_t i = 0; i < 64; i++)
+    {
+        if(i < 63)
+        {
+            printf(" %02x", ipad[i]);
+        }
+        else
+        {
+            printf(" %02x\n", ipad[i]);
+        }
+    }
+
+    printf("OPAD:\n");
+    for (size_t i = 0; i < 64; i++)
+    {
+        if(i < 63)
+        {
+            printf(" %02x", opad[i]);
+        }
+        else
+        {
+            printf(" %02x\n", opad[i]);
+        }
+    }  
+}
 
 uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
 {
@@ -43,17 +53,7 @@ uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
     uint8_t t_ipad[64];
     uint8_t t_opad[64];
 
-    for(int i = 0; i < 64; i++)
-    {
-        t_ipad[i] = IPAD_VALUE;
-        t_opad[i] = OPAD_VALUE;
-    }
-
-    for(int i = 0; i < key_length; i++)
-    {
-        t_ipad[i] ^= key[i];
-        t_opad[i] ^= key[i];
-    }
+    update_pads(t_ipad, t_opad, key, key_length);
 
     memcpy(aux, t_ipad, 64);
 
@@ -64,6 +64,12 @@ uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
 
     mbedtls_sha256(aux, msg_len + 64, hash, 0);
 
+    for(int i = 0; i < 32; i++)
+    {
+        printf("%02x-", hash[i]);
+    }
+    printf("\n");
+
     free(aux);
     aux = (uint8_t *)malloc((msg_len + 64) * sizeof(uint8_t));
 
@@ -73,8 +79,14 @@ uint8_t *hmac(uint8_t *key, size_t key_length, uint8_t *msg, size_t msg_len)
     {
         aux[64 + i] = hash[i];
     }
-
+    
     mbedtls_sha256(aux, msg_len + 64, hash, 0);
+
+    for(int i = 0; i < 32; i++)
+    {
+        printf("%02x-", hash[i]);
+    }
+    printf("\n");
 
     free(aux);
     return hash;

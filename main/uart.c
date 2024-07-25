@@ -219,7 +219,7 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
             }
 
             uart_retries++;
-            ESP_LOGE(UART_TAG, "Inavlid message");
+            ESP_LOGE(UART_TAG, "Invalid message");
             
         }
         else
