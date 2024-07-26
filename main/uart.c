@@ -60,7 +60,8 @@ int send(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size_of_r, uint8_t
         crc_checker = 0;
         uart_write_bytes(UART_NUM_2, s, size_of_s);
         ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM_2, 100));
-        int code = uart_read_bytes(UART_NUM_2, r, (RX_BUF - 1), 100 / portTICK_PERIOD_MS);
+        int code = uart_read_bytes(UART_NUM_2, r, (RX_BUF - 1), 1000 / portTICK_PERIOD_MS);
+
 
         if(code > -1)
         {
@@ -181,7 +182,7 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
     ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM_2, 100));   
     while(uart_retries <= retries)
     {
-        int code = uart_read_bytes(UART_NUM_2, r, (RX_BUF - 1), 100 / portTICK_PERIOD_MS);
+        int code = uart_read_bytes(UART_NUM_2, r, (RX_BUF - 1), 1000 / portTICK_PERIOD_MS);
 
         if(code > -1)
         {
@@ -201,7 +202,7 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
             crc_dr = replaceByte(crc_dr, r[size_of_r - 1], 0);
             crc_checker = crc16arc_bit(0, r, 256);
             printf("command sent: %x\n", s[0]);
-            printf("msg command: %x\n", r[0]);
+            printf("msg command: %x|%x \n", r[0], r[5]);
             printf("msg crc: %x%x\n", r[size_of_r - 2], r[size_of_r - 1]);
             printf("crc checker: %x\n", crc_checker);
             printf("uart retries: %i\n", uart_retries);
@@ -209,7 +210,7 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
             if(crc_dr == crc_checker && r[0] == 0x11)
             {
                 ESP_LOGI("UART", "Message validated!");
-                break;
+                return 2;
             }
             
             if(crc_dr == crc_checker && r[0] == 0x40)

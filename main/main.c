@@ -22,7 +22,7 @@ void app_main(void)
 
     uint8_t weekday_payload[4] = {0x13, 0x02, 0x24, 0x01}; 
     set(ds, 0x29, weekday_payload, 4);
-    send(ds, dr, 66, 258, 10);
+    send(ds, dr, 66, 258, 3);
     set(ds, 0x37, NULL, 0);
     send(ds, dr, 66, 258, 10);
     set(ds, 0x13, NULL, 0);
@@ -76,28 +76,28 @@ void app_main(void)
        }
     }
 
-    // uint8_t t[32];
-    // mbedtls_md_context_t ctx;
-    // mbedtls_md_type_t type = MBEDTLS_MD_SHA256;
-    // mbedtls_md_init(&ctx);
-    // mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(type), 1);
-    // mbedtls_md_hmac_starts(&ctx, (const unsigned char *)key, 1);
-    // mbedtls_md_hmac_update(&ctx, msg_to_solve, 32);
-    // mbedtls_md_finish(&ctx, t);
-    // mbedtls_md_free(&ctx);
+    uint8_t t[32];
+    mbedtls_md_context_t ctx;
+    mbedtls_md_type_t type = MBEDTLS_MD_SHA256;
+    mbedtls_md_init(&ctx);
+    mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(type), 1);
+    mbedtls_md_hmac_starts(&ctx, (const unsigned char *)key, 1);
+    mbedtls_md_hmac_update(&ctx, msg_to_solve, 32);
+    mbedtls_md_finish(&ctx, t);
+    mbedtls_md_free(&ctx);
 
-    // printf("hmac from mbedtls:\n");
-    // for(int i = 0; i < 32; i++)
-    // {
-    //    if(i < 31)
-    //    {
-    //        printf("%02x | ", t[i]);
-    //    }
-    //    else
-    //    {
-    //        printf("%02x\n", t[i]);
-    //    }
-    // }
+    printf("hmac from mbedtls:\n");
+    for(int i = 0; i < 32; i++)
+    {
+       if(i < 31)
+       {
+           printf("%02x | ", t[i]);
+       }
+       else
+       {
+           printf("%02x\n", t[i]);
+       }
+    }
 
     set(ds, 0x11, hmac_str, 32);
 
@@ -114,21 +114,25 @@ void app_main(void)
         }
     }
     
+    int code;
     for(int a = 0; a < 2; a++)
     {
-        send_solved_string(ds, dr, 66, 258, 32);
+        code = send_solved_string(ds, dr, 66, 258, 32);
+        if(code == 2)
+        {
+            break;
+        }
     }
 
     // uint8_t key[1] = {0x00};
 
-    // uint8_t msg[] = {0xb1, 0x85, 0x63, 0x21, 0x32, 0xfd, 
-    // 0x7, 0xb1, 0x58, 0x76, 0xb0, 0x6a, 0xb6, 0x5a, 0xac, 
-    // 0x4, 0x7d, 0xde, 0x41, 0x61, 0x3d, 0xc7, 0x73, 0x57, 
-    // 0xa0, 0x27, 0xc7, 0x64, 0x32, 0x1b, 0xfc, 0x78};
+    // uint8_t msg[] = {0x4E, 0x49, 0x9F, 0x08, 0x83, 0x2A, 0x47, 0x90, 0x30, 0x66, 
+    //     0x80, 0xE6, 0xFE, 0xA4, 0xFB, 0x50, 0xD6, 0xFB, 0x08, 0xE2, 0xA0, 0xAE, 0x53, 0x3F, 0xFC, 0xED, 0xA5, 0x55, 0x0D, 0x97, 0xA8, 0x23};
 
     // uint8_t key[1];
     // key[0] = 0x00;
     // uint8_t *htest = hmac(key, 1, msg, 32);
+    
 
     // for(int i = 0; i < 32; i++)
     // {
