@@ -62,26 +62,15 @@ int send(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size_of_r, uint8_t
         ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM_2, 100));
         int code = uart_read_bytes(UART_NUM_2, r, (RX_BUF - 1), 1000 / portTICK_PERIOD_MS);
 
-
         if(code > -1)
         {
-            for(int i = 0; i < 258; i++)
-            {
-                if(i < 257)
-                {
-                    printf("%x | ", r[i]);
-                }
-                else
-                {
-                    printf("%x\n", r[i]);
-                }
-            }
-
             crc_dr = replaceByte(crc_dr, r[size_of_r - 2], 1);
             crc_dr = replaceByte(crc_dr, r[size_of_r - 1], 0);
             crc_checker = crc16arc_bit(0, r, 256);
-            printf("msg crc: %x%x\n", r[size_of_r - 2], r[size_of_r - 1]);
-            printf("crc checker: %x\n", crc_checker);
+            printf("command sent: %02x\n", s[0]);
+            printf("msg command: %02x\n", r[0]);
+            printf("msg crc: %02x%02x\n", r[size_of_r - 2], r[size_of_r - 1]);
+            printf("crc checker: %02x\n", crc_checker);
             printf("uart retries: %i\n", uart_retries);
 
             if(crc_dr == crc_checker)
@@ -92,7 +81,7 @@ int send(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size_of_r, uint8_t
             else
             {
                 uart_retries++;
-                ESP_LOGE("UART", "Message invalid");
+                ESP_LOGE("UART", "Invalid message ");
             }
         }
         else
@@ -156,18 +145,6 @@ void set(uint8_t *data, uint8_t command, uint8_t *payload, uint8_t payload_len)
     uint16_t a = crc16arc_bit(0, data, 64);
     data[64] = (a >> (1 * 8)) & 0xFF;
     data[65] = (a >> (0 * 8)) & 0xFF;
-
-    // for(int i = 0; i < 66; i++)
-    // {
-    //     if(i < 65)
-    //     {
-    //         printf("%x | ", data[i]);
-    //     }
-    //     else
-    //     {
-    //         printf("%x\n", data[i]);
-    //     }
-    // }
 }
 
 
@@ -186,25 +163,13 @@ int send_solved_string(uint8_t *s, uint8_t *r, uint16_t size_of_s, uint16_t size
 
         if(code > -1)
         {
-            // for(int i = 0; i < 258; i++)
-            // {
-            //     if(i < 257)
-            //     {
-            //         printf("%x | ", r[i]);
-            //     }
-            //     else
-            //     {
-            //         printf("%x\n", r[i]);
-            //     }
-            // }
-
             crc_dr = replaceByte(crc_dr, r[size_of_r - 2], 1);
             crc_dr = replaceByte(crc_dr, r[size_of_r - 1], 0);
             crc_checker = crc16arc_bit(0, r, 256);
-            printf("command sent: %x\n", s[0]);
-            printf("msg command: %x|%x \n", r[0], r[5]);
-            printf("msg crc: %x%x\n", r[size_of_r - 2], r[size_of_r - 1]);
-            printf("crc checker: %x\n", crc_checker);
+            printf("command sent: %02x\n", s[0]);
+            printf("msg command: %02x|%02x \n", r[0], r[5]);
+            printf("msg crc: %02x%02x\n", r[size_of_r - 2], r[size_of_r - 1]);
+            printf("crc checker: %02x\n", crc_checker);
             printf("uart retries: %i\n", uart_retries);
 
             if(crc_dr == crc_checker && r[0] == 0x11)
